@@ -12,6 +12,7 @@ CLIENT_MAC="$3"
 DOMAIN="$4"
 NETMASK="$5"
 HOST_IP="$6"
+_installmethod="$7"
 
 ### Calculate network address
 ### http://stackoverflow.com/questions/15429420/given-the-ip-and-netmask-how-can-i-calculate-the-network-address-using-bash
@@ -24,7 +25,11 @@ cp /etc/hosts.irixboot /etc/hosts
 sed -i "s/\.raw/.$DOMAIN/" /etc/hosts
 echo $CLIENT_IP $CLIENT_NAME.$DOMAIN >> /etc/hosts
 echo $HOST_IP irixboot.$DOMAIN >> /etc/hosts
-su guest -c "echo $CLIENT_NAME.$DOMAIN root > ~/.rhosts"
+if [[ -d /irix ]] ; then 
+	echo $CLIENT_NAME.$DOMAIN root > /irix/.rhosts
+else
+	echo $CLIENT_NAME.$DOMAIN root > /vagrant/irix/.rhosts
+fi
 echo "$CLIENT_NAME" > /etc/hosts.equiv
 echo "irixboot" >> /etc/hosts.equiv
 
@@ -52,11 +57,17 @@ service openbsd-inetd start
 echo "Ready to network boot '$CLIENT_NAME'"
 
 ## Display some useful info about the IRIX files
-cd /irix
+if [[ "${_installmethod}" == "ftp" ]] ; then
+	cd /vagrant/irix
+else
+	cd /irix
+fi
 
-echo "*** Partitioners found:"
+echo "__________________  Partitioners found __________________"
 find . -name "fx.*" -type f | sed 's#./#bootp():/#'
 
-echo "*** Paths for Inst:"
+echo "__________________ Paths for Inst __________________"
 find . -name dist -type d | sed 's#./#irixboot:#'
+echo "__________________ Paths for Nekodeps __________________"
+echo "irixboot:nekodeps"
 
