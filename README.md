@@ -16,10 +16,14 @@ The irixboot VM provides the following services:
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * [Vagrant](https://www.vagrantup.com/downloads.html)
 * IRIX Install disc images (now optional)
+* VM host with TWO network interfaces
+  * I very much recommend using a host with two built-in interfaces, such as one WiFi and one Ethernet
+  * I have had great success with MacOS
+  * Others have had great failures with Windows 10
 
 I am not sure what range of IRIX versions this will work with or what SGI machines are compatible. Personal testing and user reports show the following (at minimum) should be compatible:
 
-* Hardware
+* Target Hardware
 	* SGI Indigo
 	* SGI Indy
 	* SGI Indigo2
