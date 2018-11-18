@@ -3,36 +3,21 @@
 # irixboot
 # ftpdist.sh - populate local disk with IRIX install images
 
-IRIXVERS="6.5"
+IRIXVERS="{{ irixversion }}"
 
 # FTP urls
-
 ## IRIX foundation
-foundation="http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/foundation1.tar.gz
-http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/foundation2.tar.gz
-http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/onc3nfs.tar.gz"
+foundation="{{ foundation }}"
 ## 6.5.30 overlays
-overlay="http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/irix-6.5.30/apps.tar.gz
-http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/irix-6.5.30/disc1.tar.gz
-http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/irix-6.5.30/disc2.tar.gz
-http://ftp.irisware.net/pub/irix-os/irix-6.5/network-installs/irix-6.5.30/disc3.tar.gz"
-
+overlay="{{ overlay }}"
 ## Dev
-devel="http://ftp.irisware.net/pub/irix-os/devel/developmentlibraries.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/devf_13.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/mipspro-7.4.3m.tar
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/mipspro744update.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/mipspro_c.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/mipspro_cee.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/mipspro_cpp.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/mipsproap.tar.gz
-http://ftp.irisware.net/pub/irix-os/devel/mipspro-74/prodev.tar.gz"
+devel="{{ devel }}"
 ## Extras
-extras="http://ftp.irisware.net/pub/irix-os/extras/perfcopilot.tar.gz
-http://ftp.irisware.net/pub/irix-os/extras/sgipostscriptfonts.tar.gz"
-
+extras="{{ extras }}"
 ## Nekodeps
-nekodeps="nekodeps_custom.0.0.1.tardist"
+nekodeps="{{ nekodeps }}"
+## Bootstrap
+bootstrap="{{ bootstrap }}"
 
 ### Partition/Format our data disk (will hold IRIX distribution)
 function formatdisk {
@@ -144,6 +129,18 @@ copydist(){
 		mkdir nekodeps
 		tar xvf "${nekodeps}" -C nekodeps
 	fi
+
+	echo "Handling bootstrap bundles"
+	mkdir -p /vagrant/irix/bundles
+	pushd /vagrant/irix/bundles
+	for _url in $bootstrap ; do 
+		_an=$(basename "${_url}")
+		if [[ ! -e "${_an}" ]] ; then
+			wget --quiet -nc "${_url}"
+			tar xvzf "${_an}"
+		fi
+	done
+	popd
 }
 
 sync_pkgs(){
