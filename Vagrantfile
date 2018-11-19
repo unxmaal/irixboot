@@ -120,6 +120,6 @@ Vagrant.configure("2") do |config|
   #config.vm.provision "shell", inline: "if ! id -u guest >/dev/null 2>&1; then useradd -s /bin/ksh -d /vagrant/irix guest ;fi "
   #config.vm.synced_folder ".", "/vagrant", type: "virtualbox", owner: "guest", group: "guest"
   config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
-  config.vm.provision "shell", path: "scripts/init.sh", run: 'always', args: installmethod
-  config.vm.provision "shell", path: "scripts/boot.sh", run: 'always', args: [clientname, clientip, clientether, clientdomain, netmask, hostip, installmethod]
+  #config.vm.provision "shell", path: "scripts/init.sh", run: 'always', args: installmethod
+  #config.vm.provision "shell", path: "scripts/boot.sh", run: 'always', args: [clientname, clientip, clientether, clientdomain, netmask, hostip, installmethod]
 end
