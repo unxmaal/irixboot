@@ -1,3 +1,10 @@
+- name: create scripts dir
+  file: 
+    path: /vagrant/scripts
+    owner: vagrant
+    group: vagrant
+    state: directory
+    mode: 0755
 - name: generate boot
   template:
     src: templates/boot.sh.j2

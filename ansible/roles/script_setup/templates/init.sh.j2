@@ -37,8 +37,8 @@ fi
 # work around dnsmasq package bug with newer dns-zone-data package
 mv /usr/share/dns/root.ds /usr/share/dns/root.ds.disabled
 
-### disable upstream nameserver (now that we don't need it anymore)
-sed -i 's/^nameserver/#nameserver/' /etc/resolv.conf
+### disable upstream nameserver - unsure why?
+#sed -i 's/^nameserver/#nameserver/' /etc/resolv.conf
 
 ### only bind to our bridge interface for dnsmasq & dhcp
 sed -i 's/^#interface.*/interface=eth1/' /etc/dnsmasq.conf

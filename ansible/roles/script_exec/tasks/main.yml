@@ -4,3 +4,6 @@
 - name: Run dist
   command: /vagrant/scripts/dist.sh
   become: true
+- name: Run dist
+  command: /vagrant/scripts/boot.sh
+  become: true
