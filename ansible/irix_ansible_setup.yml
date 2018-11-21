@@ -19,3 +19,4 @@
   tasks:
   - import_role:
      name: fetch_files
+    become: true

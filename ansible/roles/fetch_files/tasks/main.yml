@@ -51,37 +51,37 @@
 
 - name: Fetch foundation
   get_url:
-    url: {{ item }}
+    url: item
     dest: /vagrant/irix
-    with_items:
-      - "{{ foundation }}"
+  with_items:
+    - "{{ foundation }}"
 - name: Fetch overlay
   get_url:
-    url: {{ item }}
+    url: "{{ item }}"
     dest: /vagrant/irix
     with_items:
       - "{{ overlay }}"
 - name: Fetch devel
   get_url:
-    url: {{ item }}
+    url: "{{ item }}"
     dest: /vagrant/irix
     with_items:
       - "{{ devel }}"
 - name: Fetch extras
   get_url:
-    url: {{ item }}
+    url: "{{ item }}"
     dest: /vagrant/irix
     with_items:
       - "{{ extras }}"
 - name: Fetch nekodeps
   get_url:
-    url: {{ item }}
+    url: "{{ item }}"
     dest: /vagrant/irix
     with_items:
       - "{{ nekodeps }}"
 - name: Fetch bootstrap
   get_url:
-    url: {{ item }}
+    url: "{{ item }}"
     dest: /vagrant/irix
     with_items:
       - "{{ bootstrap }}"
