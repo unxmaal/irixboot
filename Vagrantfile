@@ -67,8 +67,10 @@ http://ftp.irisware.net/pub/projects/irixboot/wget_bundle-0.0.1.tardist.gz"
 # end of settings
 #####
 
-
-installdisk = "disk.vdi"
+current_dir = File.dirname(File.expand_path(__FILE__))     
+disk_prefix = 'installdisk'
+disk_ext ='.vdi'      
+installdisk = "%s/%s%s" % [current_dir,disk_prefix,disk_ext] 
 
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/contrib-jessie64"
