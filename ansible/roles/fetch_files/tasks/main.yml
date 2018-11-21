@@ -1,0 +1,107 @@
+- name: Partition the IRIX xfs volume
+  parted:
+    device: /dev/sdb
+    number: 1
+    state: present
+- name: Create a ext2 filesystem on /dev/sdb1
+  filesystem:
+    fstype: xfs
+    dev: /dev/sdb1
+- name: Mount sdb1 at /irix
+  mount:
+    path: /irix
+    src: /dev/sdb1
+    fstype: xfs
+    state: present
+- name: Install required packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages: 
+    - tftpd-hpa 
+    - isc-dhcp-server 
+    - rsh-server 
+    - dnsmasq 
+    - mksh 
+    - parted 
+    - xfsprogs 
+    - rsync 
+    - tcpdump
+
+- name: Adjust pmtu
+  sysctl:
+    name: net.ipv4.ip_no_pmtu_disc
+    value: 1
+    state: present
+- name: Adjust port range
+  sysctl:
+    name: net.ipv4.ip_local_port_range
+    value: "2048 32767"
+    state: present
+
+- name: Add efs module
+  modprobe:
+    name: efs
+    state: present
+- name: Add efs module
+  modprobe:
+    name: xfs
+    state: present
+
+- name: Fetch foundation
+  get_url:
+    url: {{ item }}
+    dest: /vagrant/irix
+    with_items:
+      - "{{ foundation }}"
+- name: Fetch overlay
+  get_url:
+    url: {{ item }}
+    dest: /vagrant/irix
+    with_items:
+      - "{{ overlay }}"
+- name: Fetch devel
+  get_url:
+    url: {{ item }}
+    dest: /vagrant/irix
+    with_items:
+      - "{{ devel }}"
+- name: Fetch extras
+  get_url:
+    url: {{ item }}
+    dest: /vagrant/irix
+    with_items:
+      - "{{ extras }}"
+- name: Fetch nekodeps
+  get_url:
+    url: {{ item }}
+    dest: /vagrant/irix
+    with_items:
+      - "{{ nekodeps }}"
+- name: Fetch bootstrap
+  get_url:
+    url: {{ item }}
+    dest: /vagrant/irix
+    with_items:
+      - "{{ bootstrap }}"
+
+- name: Extracting tarballs
+  unarchive:
+    src: "{{ item }}"
+    dest: "/vagrant/irix/"
+    copy: no
+  with_fileglob:
+  - "/vagrant/irix/*.tar"
+  - "/vagrant/irix/*.tar.gz"
+
+- name: rsync from /vagrant/irix to /irix
+  synchronize:
+    src: /vagrant/irix
+    dest: /irix
+- name: Fix /irix permissions
+  file: 
+    dest: /irix 
+    owner: guest 
+    group: guest
+    recurse: yes

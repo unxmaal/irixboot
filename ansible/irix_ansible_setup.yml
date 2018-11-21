@@ -14,3 +14,8 @@
   tasks:
   - import_role:
      name: script_exec
+- name: run fetch_files play
+  hosts: all
+  tasks:
+  - import_role:
+     name: fetch_files
