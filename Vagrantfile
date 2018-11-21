@@ -26,7 +26,7 @@ netmask = '255.255.255.0'
 # your host pc will get this IP
 hostip = '192.168.0.1'
 # this name can change from en0 to something else. verify it.
-bridgenic = 'en0'
+bridgenic = 'en2'
 
 # FTP urls
 
