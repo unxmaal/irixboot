@@ -137,7 +137,7 @@ copydist(){
 		_an=$(basename "${_url}")
 		if [[ ! -e "${_an}" ]] ; then
 			wget --quiet -nc "${_url}"
-			tar xvzf "${_an}"
+			gunzip "${_an}"
 		fi
 	done
 	popd
