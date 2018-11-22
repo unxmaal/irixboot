@@ -16,15 +16,19 @@ installmirror = "ftp.irisware.com"
 clientname = 'sgi'
 # whatever domain that you make up
 clientdomain = 'devonshire.local'
+
+# Internal network your SGI will be on
+network = '192.168.0.0' 
+# Internal network's netmask
+netmask = '255.255.255.0'
+# your host pc will get this IP
+hostip = '192.168.0.1'
 # your sgi box's IP address that you make up
 clientip = '192.168.0.77'
 # your sgi box's physical hardware address, from printenv at PROM
 clientether = '08:00:69:0e:af:65'
-# proper netmask
-netmask = '255.255.255.0'
 
-# your host pc will get this IP
-hostip = '192.168.0.1'
+
 # this name can change from en0 to something else. verify it.
 bridgenic = 'en2'
 
@@ -108,6 +112,7 @@ Vagrant.configure("2") do |config|
         clientip: clientip,
         clientether: clientether,
         netmask: netmask,
+        network: network,
         hostip: hostip
     }
   end

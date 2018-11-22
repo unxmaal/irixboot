@@ -1,18 +1,21 @@
-- name: Partition the IRIX xfs volume
-  parted:
-    device: /dev/sdb
-    number: 1
+# Setup the virt OS
+- name: Set hostname
+  hostname: irixboot
+
+- name: Restart service rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+
+- apt_repository:
+    repo: deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
     state: present
-- name: Create a ext2 filesystem on /dev/sdb1
-  filesystem:
-    fstype: xfs
-    dev: /dev/sdb1
-- name: Mount sdb1 at /irix
-  mount:
-    path: /irix
-    src: /dev/sdb1
-    fstype: xfs
-    state: present
+
+- name: Add an apt key 
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 93C4A3FD7BB9C367
+
 - name: Install required packages
   apt:
     name: "{{ packages }}"
@@ -28,7 +31,11 @@
     - xfsprogs 
     - rsync 
     - tcpdump
+    - ansible
+    - git 
 
+
+# Tune OS
 - name: Adjust pmtu
   sysctl:
     name: net.ipv4.ip_no_pmtu_disc
@@ -49,6 +56,25 @@
     name: xfs
     state: present
 
+#----- Set up XFS volume
+- name: Partition the IRIX xfs volume
+  parted:
+    device: /dev/sdb
+    number: 1
+    state: present
+- name: Create a ext2 filesystem on /dev/sdb1
+  filesystem:
+    fstype: xfs
+    dev: /dev/sdb1
+- name: Mount sdb1 at /irix
+  mount:
+    path: /irix
+    src: /dev/sdb1
+    fstype: xfs
+    state: mounted
+
+
+#-------- Manage Media
 - name: Fetch foundation
   get_url:
     url: "{{ item }}"
@@ -113,8 +139,6 @@
   shell: gunzip "{{ item }}"
   with_items: '{{ bundles.stdout_lines }}'
 
-
-
 - name: rsync from /vagrant/irix to /irix
   synchronize:
     src: /vagrant/irix/
@@ -126,3 +150,99 @@
     owner: guest 
     group: guest
     recurse: yes
+
+#------- Setup Apps
+# work around dnsmasq package bug with newer dns-zone-data package
+#mv /usr/share/dns/root.ds /usr/share/dns/root.ds.disabled
+
+### disable upstream nameserver - unsure why?
+#sed -i 's/^nameserver/#nameserver/' /etc/resolv.conf
+
+- name: Configure isc-dhcp-server
+  copy:
+    src: files/isc-dhcp-server
+    dest: /etc/default/isc-dhcp-server
+    owner: root
+    group: root
+
+- name: Configure dnsmasq.conf
+  copy:
+    src: files/dnsmasq.conf
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+
+- name: Configure tftpd-hpa
+  copy:
+    src: files/tftpd-hpa
+    dest: /etc/default/tftpd-hpa
+    owner: root
+    group: root
+
+- name: generate hosts
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0744
+
+- name: generate .rhosts
+  template:
+    src: templates/rhosts.j2
+    dest: /irix/.rhosts
+    owner: root
+    group: root
+    mode: 0744
+
+- name: generate hosts.equiv
+  template:
+    src: templates/hosts.equiv.j2
+    dest: /etc/hosts.equiv
+    owner: root
+    group: root
+    mode: 0744
+
+- name: Add the guest user
+  user:
+    name: guest
+    shell: /bin/ksh
+    home: irix
+
+
+
+#---- Restart services
+- name: Restart service openbsd-inetd
+  service:
+    name: openbsd-inetd
+    state: restarted
+
+- name: Restart service isc-dhcp-server
+  service:
+    name: isc-dhcp-server
+    state: restarted
+
+- name: Restart service tftpd-hpa
+  service:
+    name: tftpd-hpa
+    state: restarted
+
+- name: Restart service dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted
+
+#------- Setup internal Ansible
+- git:
+    repo: 'https://github.com/unxmaal/irix_ansible.git'
+    dest: /home/vagrant/irix_ansible
+
+- name: copy inventory.ini
+  copy:
+    src: /tmp/inventory.ini
+    dest: /home/vagrant/irix_ansible/inventory.ini
+    remote_src: yes
+    owner: vagrant
+    group: vagrant
+
+#--------- Display  useful info

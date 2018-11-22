@@ -9,11 +9,11 @@
   tasks:
   - import_role:
      name: inventory_gen
-- name: run virt scripts
-  hosts: all
-  tasks:
-  - import_role:
-     name: script_exec
+# - name: run virt scripts
+#   hosts: all
+#   tasks:
+#   - import_role:
+#      name: script_exec
 - name: run fetch_files play
   hosts: all
   tasks:
