@@ -80,15 +80,40 @@
   with_items:
     - "{{ bootstrap.splitlines() }}"
 
+- name: Listing tarballs
+  shell: ls /vagrant/irix/*.tar.gz
+  register: tarballs
+  changed_when: false
+
+- name: Listing tarballs
+  shell: ls /vagrant/irix/*.tar
+  register: tars
+  changed_when: false
+
+- name: Listing bundles
+  shell: ls /vagrant/irix/*.tardist.gz
+  register: bundles
+  changed_when: false
+
 - name: Extracting tarballs
   unarchive:
     src: "{{ item }}"
     dest: /vagrant/irix/
     copy: no
-  with_fileglob:
-  - "/vagrant/irix/*.tar"
-  - "/vagrant/irix/*.tar.gz"
-  delegate_to: default
+  with_items: '{{ tarballs.stdout_lines }}'
+
+- name: Extracting tars
+  unarchive:
+    src: "{{ item }}"
+    dest: /vagrant/irix/
+    copy: no
+  with_items: '{{ tars.stdout_lines }}'
+
+- name: Extracting bundles
+  shell: gunzip "{{ item }}"
+  with_items: '{{ bundles.stdout_lines }}'
+
+
 
 - name: rsync from /vagrant/irix to /irix
   synchronize:
