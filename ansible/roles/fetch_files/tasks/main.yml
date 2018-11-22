@@ -51,54 +51,50 @@
 
 - name: Fetch foundation
   get_url:
-    url: item
+    url: "{{ item }}"
     dest: /vagrant/irix
   with_items:
-    - "{{ foundation }}"
+    - "{{ foundation.splitlines() }}"
 - name: Fetch overlay
   get_url:
     url: "{{ item }}"
     dest: /vagrant/irix
-    with_items:
-      - "{{ overlay }}"
+  with_items:
+    - "{{ overlay.splitlines() }}"
 - name: Fetch devel
   get_url:
     url: "{{ item }}"
     dest: /vagrant/irix
-    with_items:
-      - "{{ devel }}"
+  with_items:
+    - "{{ devel.splitlines() }}"
 - name: Fetch extras
   get_url:
     url: "{{ item }}"
     dest: /vagrant/irix
-    with_items:
-      - "{{ extras }}"
-- name: Fetch nekodeps
-  get_url:
-    url: "{{ item }}"
-    dest: /vagrant/irix
-    with_items:
-      - "{{ nekodeps }}"
+  with_items:
+    - "{{ extras.splitlines() }}"
 - name: Fetch bootstrap
   get_url:
     url: "{{ item }}"
     dest: /vagrant/irix
-    with_items:
-      - "{{ bootstrap }}"
+  with_items:
+    - "{{ bootstrap.splitlines() }}"
 
 - name: Extracting tarballs
   unarchive:
     src: "{{ item }}"
-    dest: "/vagrant/irix/"
+    dest: /vagrant/irix/
     copy: no
   with_fileglob:
   - "/vagrant/irix/*.tar"
   - "/vagrant/irix/*.tar.gz"
+  delegate_to: default
 
 - name: rsync from /vagrant/irix to /irix
   synchronize:
-    src: /vagrant/irix
-    dest: /irix
+    src: /vagrant/irix/
+    dest: /irix/
+  delegate_to: default
 - name: Fix /irix permissions
   file: 
     dest: /irix 
