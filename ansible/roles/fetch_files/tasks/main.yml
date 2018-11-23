@@ -10,4 +10,6 @@
 - import_tasks: setup_internal_ansible.yml
 #-------- Setup Media
 - import_tasks: setup_media.yml
+#-------- rsync media to /irix
+- import_tasks: rsync_to_irix.yml
 #--------- Display  useful info
