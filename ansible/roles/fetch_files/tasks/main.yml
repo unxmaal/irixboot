@@ -13,3 +13,4 @@
 #-------- rsync media to /irix
 - import_tasks: rsync_to_irix.yml
 #--------- Display  useful info
+- import_tasks: display_results.yml
