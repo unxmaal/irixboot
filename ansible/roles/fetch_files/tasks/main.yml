@@ -165,9 +165,16 @@
     state: restarted
 
 #------- Setup internal Ansible
-- git:
+- name: clear irix_ansible repo
+  file:
+    dest: /home/vagrant/irix_ansible
+    state: absent
+
+- name: Clone irix_ansible repo
+  git:
     repo: 'https://github.com/unxmaal/irix_ansible.git'
     dest: /home/vagrant/irix_ansible
+    update: yes
 
 - name: copy inventory.ini
   copy:
@@ -177,70 +184,71 @@
     owner: vagrant
     group: vagrant
 
-#-------- Manage Media
-- name: Fetch foundation
-  get_url:
-    url: "{{ item }}"
-    dest: /vagrant/irix
-  with_items:
-    - "{{ foundation.splitlines() }}"
-- name: Fetch overlay
-  get_url:
-    url: "{{ item }}"
-    dest: /vagrant/irix
-  with_items:
-    - "{{ overlay.splitlines() }}"
-- name: Fetch devel
-  get_url:
-    url: "{{ item }}"
-    dest: /vagrant/irix
-  with_items:
-    - "{{ devel.splitlines() }}"
-- name: Fetch extras
-  get_url:
-    url: "{{ item }}"
-    dest: /vagrant/irix
-  with_items:
-    - "{{ extras.splitlines() }}"
-- name: Fetch bootstrap
-  get_url:
-    url: "{{ item }}"
-    dest: /vagrant/irix
-  with_items:
-    - "{{ bootstrap.splitlines() }}"
+# #-------- Manage Media
+# - name: Fetch foundation
+#   get_url:
+#     url: "{{ item }}"
+#     dest: /vagrant/irix
+#   with_items:
+#     - "{{ foundation.splitlines() }}"
+# - name: Fetch overlay
+#   get_url:
+#     url: "{{ item }}"
+#     dest: /vagrant/irix
+#   with_items:
+#     - "{{ overlay.splitlines() }}"
+# - name: Fetch devel
+#   get_url:
+#     url: "{{ item }}"
+#     dest: /vagrant/irix
+#   with_items:
+#     - "{{ devel.splitlines() }}"
+# - name: Fetch extras
+#   get_url:
+#     url: "{{ item }}"
+#     dest: /vagrant/irix
+#   with_items:
+#     - "{{ extras.splitlines() }}"
+# - name: Fetch bootstrap
+#   get_url:
+#     url: "{{ item }}"
+#     dest: /vagrant/irix
+#   with_items:
+#     - "{{ bootstrap.splitlines() }}"
 
-- name: Listing tarballs
-  shell: ls /vagrant/irix/*.tar.gz
-  register: tarballs
-  changed_when: false
+# - name: Listing tarballs
+#   shell: ls /vagrant/irix/*.tar.gz
+#   register: tarballs
+#   changed_when: false
 
-- name: Listing tarballs
-  shell: ls /vagrant/irix/*.tar
-  register: tars
-  changed_when: false
+# - name: Listing tarballs
+#   shell: ls /vagrant/irix/*.tar
+#   register: tars
+#   changed_when: false
 
-- name: Listing bundles
-  shell: ls /vagrant/irix/*.tardist.gz
-  register: bundles
-  changed_when: false
+# - name: Listing bundles
+#   shell: ls /vagrant/irix/*.tardist.gz
+#   register: bundles
+#   changed_when: false
 
-- name: Extracting tarballs
-  unarchive:
-    src: "{{ item }}"
-    dest: /vagrant/irix/
-    copy: no
-  with_items: '{{ tarballs.stdout_lines }}'
+# - name: Extracting tarballs
+#   unarchive:
+#     src: "{{ item }}"
+#     dest: /vagrant/irix/
+#     copy: no
+#   with_items: '{{ tarballs.stdout_lines }}'
 
-- name: Extracting tars
-  unarchive:
-    src: "{{ item }}"
-    dest: /vagrant/irix/
-    copy: no
-  with_items: '{{ tars.stdout_lines }}'
+# - name: Extracting tars
+#   unarchive:
+#     src: "{{ item }}"
+#     dest: /vagrant/irix/
+#     copy: no
+#   with_items: '{{ tars.stdout_lines }}'
 
 - name: Extracting bundles
   shell: gunzip "{{ item }}"
   with_items: '{{ bundles.stdout_lines }}'
+  ignore_errors: true
 
 - name: rsync from /vagrant/irix to /irix
   synchronize:

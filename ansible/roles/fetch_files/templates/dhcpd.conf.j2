@@ -1,3 +1,6 @@
+allow booting;
+allow bootp;
+
 subnet {{ network }} netmask {{ netmask }} { ignore unknown-clients; }
 
 host {{ clientname }} {
