@@ -51,38 +51,60 @@ By default, this vagrant VM will fetch proper 6.5.30 installation packages from 
 These settings are found at the top of `Vagrantfile`. Edit them to suit your environment.
 
 Set this to the version of IRIX you are installing. You must create a subdirectory in the `irix` directory with the same name:
-
 ```
 irixversion = '6.5'
 ```
-Set installmethod to either "ftp". installmirror is currently not used.
 
+Currently installmethod is only ftp. cd is no longer supported on this fork.
 ```
 installmethod = "ftp"
-installmirror = "ftp.irisware.net"
 ```
 
-These should be obvious - the network parameters for the target SGI machine:
-
+Pick your install mirror
 ```
-clientname = 'indy'
-clientip = '192.168.42.100'
-clientether = '08:00:69:CA:FE:42'
+installmirror = "ftp.irisware.com"
 ```
 
-These are the common network parameters for your subnet:
-
+your SGI box's hostname
 ```
-domain = 'sgi.halfmanhalftaco.com'
+clientname = 'sgi'
+```
+
+whatever domain that you make up
+```
+clientdomain = 'devonshire.local'
+```
+
+Internal network your SGI will be on. Note this is the actual "network", in the technical subnetting sense of the term.
+```
+network = '192.168.0.0' 
+```
+
+Internal network's netmask
+```
 netmask = '255.255.255.0'
 ```
 
-This is the network configuration for the server VM. the `bridgenic` parameter is the interface name for the NIC (on your host machine - not in the VM) that is connected to the network your target is on. Since interface names can vary wildly between operating systems, you can list your system's interfaces as seen by VirtualBox with `VBoxManage list bridgedifs` - the `Name` parameter is the one it expects.
+irixboot's host IP. This is the VM's IP on its internal point to point link to the target SGI client machine.
+```
+hostip = '192.168.0.1'
+```
 
+The SGI client box's IP address
 ```
-hostip = '192.168.42.5'
-bridgenic = 'eth0'
+clientip = '192.168.0.2'
 ```
+
+The sgi box's physical hardware address, from printenv at PROM
+```
+clientether = '08:00:69:0e:af:65'
+```
+
+This is the name of the internet-connected interface on your physical machine. In my case, it's the wifi adapter, which is en2 
+```
+bridgenic = 'en2'
+```
+
 
 NOTE: This VM starts a BOOTP server that will listen to broadcast traffic on your network. It is configured to ignore anything but the target system but if you have another DHCP/BOOTP server on the LAN segment the queries from the SGI hardware may get answered by your network's existing DHCP server which will cause problems. You may want to temporarily disable DHCP/BOOTP if you are running it on your LAN, configure it to not reply to queries from the SGI system, or put SGI hardware on a separate LAN (my recommendation).
 
@@ -103,7 +125,7 @@ If you need to boot `fx` to label/partition your disk, open the command monitor 
 
 where `/overlay30/stand/fx.ARCS` is a path relative to your selected IRIX version in the directory structure from above. When installing IRIX 6.5.x you'll want to use the partitioner included with the overlay set (first disc), but prior versions of IRIX usually locate the partitioner on the first install disc.
 
- Use `fx.ARCS` for R4xxx machines and `fx.64` for R5000+ machines (and others for older machines, I assume). Once `irixboot` finishes setup it lists any detected partitioners to help you find the correct path.
+ Use `fx.ARCS` for R4xxx machines (like the O2) and `fx.64` for R5000+ machines (and others for older machines, I assume). Once `irixboot` finishes setup it lists any detected partitioners to help you find the correct path.
 
 ### inst (IRIX installer)
 NOTE: After `irixboot` initializes, it displays a list of all `dist` subdirectories for your convenience. Use this list to preserve your sanity while running inst.

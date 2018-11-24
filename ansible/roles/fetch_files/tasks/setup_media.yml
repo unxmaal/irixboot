@@ -1,31 +1,31 @@
 - name: Fetch foundation
   get_url:
     url: "{{ item }}"
-    dest: /vagrant/irix
+    dest: "/vagrant/irix/{{  item | urlsplit('path') | basename }}"
   with_items:
     - "{{ foundation.splitlines() }}"
 - name: Fetch overlay
   get_url:
     url: "{{ item }}"
-    dest: /vagrant/irix
+    dest: "/vagrant/irix/{{  item | urlsplit('path') | basename }}"
   with_items:
     - "{{ overlay.splitlines() }}"
 - name: Fetch devel
   get_url:
     url: "{{ item }}"
-    dest: /vagrant/irix
+    dest: "/vagrant/irix/{{  item | urlsplit('path') | basename }}"
   with_items:
     - "{{ devel.splitlines() }}"
 - name: Fetch extras
   get_url:
     url: "{{ item }}"
-    dest: /vagrant/irix
+    dest: "/vagrant/irix/{{  item | urlsplit('path') | basename }}"
   with_items:
     - "{{ extras.splitlines() }}"
 - name: Fetch bootstrap
   get_url:
     url: "{{ item }}"
-    dest: /vagrant/irix
+    dest: "/vagrant/irix/{{  item | urlsplit('path') | basename }}"
   with_items:
     - "{{ bootstrap.splitlines() }}"
 
