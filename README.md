@@ -100,11 +100,17 @@ The sgi box's physical hardware address, from printenv at PROM
 clientether = '08:00:69:0e:af:65'
 ```
 
-This is the name of the internet-connected interface on your physical machine. In my case, it's the wifi adapter, which is en2 
+This is the name of the interface on your physical machine that's connected to your SGI box. In my case, it's the ethernet adapter, which is en0. 
 ```
-bridgenic = 'en2'
+bridgenic = 'en0'
 ```
 
+## Networking overview
+The irixboot vm's fake network interfaces map to your physical host as follows:
+| Physical Host | Irixboot |
+|---|---|
+| Home LAN-connected NIC | Adapter 1, NAT, eth0 |
+| SGI-connected NIC | Adapter 2, Bridged, eth1 |
 
 NOTE: This VM starts a BOOTP server that will listen to broadcast traffic on your network. It is configured to ignore anything but the target system but if you have another DHCP/BOOTP server on the LAN segment the queries from the SGI hardware may get answered by your network's existing DHCP server which will cause problems. You may want to temporarily disable DHCP/BOOTP if you are running it on your LAN, configure it to not reply to queries from the SGI system, or put SGI hardware on a separate LAN (my recommendation).
 
@@ -121,9 +127,9 @@ Vagrant will automatically create a vagrant/irix directory on your host machine 
 
 If you need to boot `fx` to label/partition your disk, open the command monitor and issue a command similar to this:
 
-`bootp():/overlay30/stand/fx.ARCS`
+`bootp():/disc1/stand/fx.ARCS`
 
-where `/overlay30/stand/fx.ARCS` is a path relative to your selected IRIX version in the directory structure from above. When installing IRIX 6.5.x you'll want to use the partitioner included with the overlay set (first disc), but prior versions of IRIX usually locate the partitioner on the first install disc.
+where `/disc1/stand/fx.ARCS` is a path relative to your selected IRIX version in the directory structure from above. When installing IRIX 6.5.x you'll want to use the partitioner included with the overlay set (first disc), but prior versions of IRIX usually locate the partitioner on the first install disc.
 
  Use `fx.ARCS` for R4xxx machines (like the O2) and `fx.64` for R5000+ machines (and others for older machines, I assume). Once `irixboot` finishes setup it lists any detected partitioners to help you find the correct path.
 
@@ -135,7 +141,7 @@ The installer can be reached through the monitor GUI as follows:
 * At the maintenance boot screen, select "Install Software"
 * If it prompts you for an IP address, enter the same address you entered into the Vagrantfile config for `clientip`.
 * Use `irixboot` as the install server hostname.
-* For the installation path, this depends on your directory structure. If you use the structure example from above, you would use the path `overlay30/dist`. Notice the lack of leading `/`.
+* For the installation path, this depends on your directory structure. If you use the structure example from above, you would use the path `disc1/dist`. Notice the lack of leading `/`.
 * This should load the miniroot over the network and boot into the installer.
 * To access the other distributions you extracted, use `open irixboot:<directory>/dist`.
 

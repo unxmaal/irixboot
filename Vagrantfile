@@ -28,9 +28,9 @@ clientip = '192.168.0.77'
 # your sgi box's physical hardware address, from printenv at PROM
 clientether = '08:00:69:0e:af:65'
 
-
-# this name can change from en0 to something else. verify it.
-bridgenic = 'en2'
+# This is the name of the interface on your physical machine that's connected to your SGI box
+#   In my case, it's the ethernet adapter, which is en0 
+bridgenic = 'en0'
 
 # FTP urls
 
