@@ -1,9 +1,11 @@
 irixboot
 ========
 
-irixboot is designed to quickly configure a disposable VM to boot a specific version of the SGI IRIX installer over the network on an SGI machine without a whole lot of fuss. There is no need to manually extract CD images from an IRIX machine or compile kernels to get EFS support, configure BOOTP, etc.
+irixboot is designed to quickly configure a disposable VM to boot a specific version of the SGI IRIX installer over the network on an SGI machine without a whole lot of fuss. 
 
-This sets up some configuration in the VM that is not secure or may interfere with other network services (e.g. DHCP) so please don't leave it running long-term. I recommend only attaching the network interface to an isolated network for this purpose and then `vagrant halt` or `vagrant destroy` the VM when you are done installing.
+By default irixboot downloads IRIX 6.5.30 installation media from a mirror site. You can modify the media download URLs in the included Vagrantfile.
+
+irixboot is not secure and may interfere with other network services (e.g. DHCP) so please don't leave it running long-term. I recommend only attaching the network interface to an isolated network for this purpose and then `vagrant halt` or `vagrant destroy` the VM when you are done installing.
 
 The irixboot VM provides the following services:
 
@@ -11,11 +13,12 @@ The irixboot VM provides the following services:
 * TFTP server (via tftpd-hpa)
 * RSH server (via rsh-server)
 
+NOTE: This fork no longer supports CD images. It may again in the future, if there is demand. If you must extract from CD media, see the upstream https://github.com/halfmanhalftaco/irixboot. 
+
 ## Requirements
 
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * [Vagrant](https://www.vagrantup.com/downloads.html)
-* IRIX Install disc images (now optional)
 * VM host with TWO network interfaces
   * I very much recommend using a host with two built-in interfaces, such as one WiFi and one Ethernet
   * I have had great success with MacOS
@@ -24,15 +27,12 @@ The irixboot VM provides the following services:
 I am not sure what range of IRIX versions this will work with or what SGI machines are compatible. Personal testing and user reports show the following (at minimum) should be compatible:
 
 * Target Hardware
+	* SGI O2
 	* SGI Indigo
-	* SGI Indy
 	* SGI Indigo2
 	* SGI Octane
 
 * Operating Systems
-	* IRIX 4D1 4.0.5
-	* IRIX 5.3
-	* IRIX 6.2
 	* IRIX 6.5.22
 	* IRIX 6.5.30
 
@@ -45,46 +45,72 @@ Some changes will definitely be needed to support other hypervisors, but irixboo
 ## Setup
 By default, this vagrant VM will fetch proper 6.5.30 installation packages from ftp.irisware.net.
 
-If you wish to use CD images, populate the `irix/` directory with the CD images (described below) and edit the `Vagrantfile` with your environment/client settings, then `vagrant up`.
-
 
 ## Settings
 
 These settings are found at the top of `Vagrantfile`. Edit them to suit your environment.
 
 Set this to the version of IRIX you are installing. You must create a subdirectory in the `irix` directory with the same name:
-
 ```
 irixversion = '6.5'
 ```
-Set installmethod to either "ftp" or "cd". installmirror is currently not used.
 
+Currently installmethod is only ftp. cd is no longer supported on this fork.
 ```
 installmethod = "ftp"
-installmirror = "ftp.irisware.net"
 ```
 
-These should be obvious - the network parameters for the target SGI machine:
-
+Pick your install mirror
 ```
-clientname = 'indy'
-clientip = '192.168.42.100'
-clientether = '08:00:69:CA:FE:42'
+installmirror = "ftp.irisware.com"
 ```
 
-These are the common network parameters for your subnet:
-
+your SGI box's hostname
 ```
-domain = 'sgi.halfmanhalftaco.com'
+clientname = 'sgi'
+```
+
+whatever domain that you make up
+```
+clientdomain = 'devonshire.local'
+```
+
+Internal network your SGI will be on. Note this is the actual "network", in the technical subnetting sense of the term.
+```
+network = '192.168.0.0' 
+```
+
+Internal network's netmask
+```
 netmask = '255.255.255.0'
 ```
 
-This is the network configuration for the server VM. the `bridgenic` parameter is the interface name for the NIC (on your host machine - not in the VM) that is connected to the network your target is on. Since interface names can vary wildly between operating systems, you can list your system's interfaces as seen by VirtualBox with `VBoxManage list bridgedifs` - the `Name` parameter is the one it expects.
+irixboot's host IP. This is the VM's IP on its internal point to point link to the target SGI client machine.
+```
+hostip = '192.168.0.1'
+```
 
+The SGI client box's IP address
 ```
-hostip = '192.168.42.5'
-bridgenic = 'eth0'
+clientip = '192.168.0.2'
 ```
+
+The sgi box's physical hardware address, from printenv at PROM
+```
+clientether = '08:00:69:0e:af:65'
+```
+
+This is the name of the interface on your physical machine that's connected to your SGI box. In my case, it's the ethernet adapter, which is en0. 
+```
+bridgenic = 'en0'
+```
+
+## Networking overview
+The irixboot vm's fake network interfaces map to your physical host as follows:
+| Physical Host | Irixboot |
+|---|---|
+| Home LAN-connected NIC | Adapter 1, NAT, eth0 |
+| SGI-connected NIC | Adapter 2, Bridged, eth1 |
 
 NOTE: This VM starts a BOOTP server that will listen to broadcast traffic on your network. It is configured to ignore anything but the target system but if you have another DHCP/BOOTP server on the LAN segment the queries from the SGI hardware may get answered by your network's existing DHCP server which will cause problems. You may want to temporarily disable DHCP/BOOTP if you are running it on your LAN, configure it to not reply to queries from the SGI system, or put SGI hardware on a separate LAN (my recommendation).
 
@@ -92,28 +118,6 @@ NOTE: This VM starts a BOOTP server that will listen to broadcast traffic on you
 This VM can now sync installation media from the FTP site ftp.irisware.net. As this site contains more, and more recently updated, packages, it is the default. 
 
 Vagrant will automatically create a vagrant/irix directory on your host machine that is shared between it and the VM. It will then fetch the installation media archives only if they are missing from that directory. 
-
-## IRIX media from Install Discs
-
-Once you've imaged your SGI discs, you need to populate the `irix/` directory for irixboot to extract them. Within `irix/` should be directories with the names of the IRIX versions they contain. These version numbers must match what you configured earlier for the `irixversion` parameter in `Vagrantfile`. Within each of those directories must be subdirectories of arbitrary name, and any number of disk image files within those. Further levels of directory nesting are not currently supported. 
-
-Multiple files in one subdirectory will be extracted on top of each other. This is useful to avoid having to `open` several distributions from the `inst`, since some (all?) of the disc sets can be combined (e.g. Overlays discs combined, Foundation discs combined, etc.).
-
-An example hierarchy:
-
-* irix/
-  * 6.5/
-    * foundation/
-		* IRIX 6.5 Foundation 1.img
-		* IRIX 6.5 Foundation 2.img
-	* overlay30/
-		* IRIX 6.5.30 Overlay 1.img
-		* IRIX 6.5.30 Overlay 2.img
-		* IRIX 6.5.30 Overlay 3.img
-	* nfs/
-		* ONC-NFS for IRIX 6.5.img
-	* apps30/
-		* IRIX 6.5.30 Applications 0806.img
 
 ## Booting
 
@@ -123,11 +127,11 @@ An example hierarchy:
 
 If you need to boot `fx` to label/partition your disk, open the command monitor and issue a command similar to this:
 
-`bootp():/overlay30/stand/fx.ARCS`
+`bootp():/disc1/stand/fx.ARCS`
 
-where `/overlay30/stand/fx.ARCS` is a path relative to your selected IRIX version in the directory structure from above. When installing IRIX 6.5.x you'll want to use the partitioner included with the overlay set (first disc), but prior versions of IRIX usually locate the partitioner on the first install disc.
+where `/disc1/stand/fx.ARCS` is a path relative to your selected IRIX version in the directory structure from above. When installing IRIX 6.5.x you'll want to use the partitioner included with the overlay set (first disc), but prior versions of IRIX usually locate the partitioner on the first install disc.
 
- Use `fx.ARCS` for R4xxx machines and `fx.64` for R5000+ machines (and others for older machines, I assume). Once `irixboot` finishes setup it lists any detected partitioners to help you find the correct path.
+ Use `fx.ARCS` for R4xxx machines (like the O2) and `fx.64` for R5000+ machines (and others for older machines, I assume). Once `irixboot` finishes setup it lists any detected partitioners to help you find the correct path.
 
 ### inst (IRIX installer)
 NOTE: After `irixboot` initializes, it displays a list of all `dist` subdirectories for your convenience. Use this list to preserve your sanity while running inst.
@@ -137,17 +141,16 @@ The installer can be reached through the monitor GUI as follows:
 * At the maintenance boot screen, select "Install Software"
 * If it prompts you for an IP address, enter the same address you entered into the Vagrantfile config for `clientip`.
 * Use `irixboot` as the install server hostname.
-* For the installation path, this depends on your directory structure. If you use the structure example from above, you would use the path `overlay30/dist`. Notice the lack of leading `/`.
+* For the installation path, this depends on your directory structure. If you use the structure example from above, you would use the path `disc1/dist`. Notice the lack of leading `/`.
 * This should load the miniroot over the network and boot into the installer.
 * To access the other distributions you extracted, use `open irixboot:<directory>/dist`.
 
+## PRO TIP
+Take a look in the expect/ directory for my own personal install scripts, written in expect. You can use them as a guide for what to select during an installation -- or if you're really brave/foolish, follow the enclosed README to run those scripts over serial console.
 
 ## TODO
-
-* Support configuration for multiple target machines simultaneously (currently requires destroying/recreating the VM for each machine)
-* More robust support for different formats in the `irix` directory
-  * e.g. Support ISO9660, zip files, tarballs, tardist, loose files, etc. Currently assumes any file is an EFS filesystem image.
-* Better support for halting/restarting the VM and detecting changes in the `irix` directory.
+* Make the download phase provide more feedback.
+* Confirm if the download phase really downloads every time, or is smart enough to skip already-downloaded items.
 
 ## License
 
