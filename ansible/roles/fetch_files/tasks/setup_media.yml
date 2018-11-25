@@ -49,6 +49,7 @@
     src: "{{ item }}"
     dest: /vagrant/irix/
     copy: no
+    creates: "{{ item.split('.tar.gz')[0] }}"
   with_items: '{{ tarballs.stdout_lines }}'
 
 - name: Extracting tars
@@ -56,9 +57,13 @@
     src: "{{ item }}"
     dest: /vagrant/irix/
     copy: no
+    creates: "{{ item.split('.tar')[0] }}"
   with_items: '{{ tars.stdout_lines }}'
 
 - name: Extracting bundles
-  shell: gunzip "{{ item }}"
+  unarchive:
+    src: "{{ item }}"
+    dest: /vagrant/irix/
+    copy: no
+    creates: "{{ item.split('.tardist')[0] }}"
   with_items: '{{ bundles.stdout_lines }}'
-  ignore_errors: true

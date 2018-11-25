@@ -5,7 +5,7 @@ send -- "\r"
 
 expect "*Option?*" { send -- "5\r" }
 expect "*> " { send -- "setenv netaddr 192.168.0.77\r" }
-expect "*> " { send -- "bootp():/30-Overlays1/stand/fx.ARCS -x\r" }
+expect "*> " { send -- "bootp():/disc1/stand/fx.ARCS -x\r" }
 expect "*(no) " { send -- "\r" }
 expect "*device-name*" { send -- "dksc\r" }
 expect "*ctlr#*" { send -- "0\r" }
