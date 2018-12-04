@@ -10,7 +10,7 @@ irixversion = '6.5'
 
 # installmethod can be via CD images or FTP
 installmethod = "ftp"
-installmirror = "ftp.irisware.com"
+installmirror = "us.irisware.net"
 
 # your SGI box's hostname
 clientname = 'sgi'
