@@ -26,7 +26,9 @@ hostip = '192.168.0.1'
 # your sgi box's IP address that you make up
 clientip = '192.168.0.77'
 # your sgi box's physical hardware address, from printenv at PROM
+# my O2 clientether = '08:00:69:0e:af:65'
 clientether = '08:00:69:0e:af:65'
+# my O300 clientether = '08:00:69:13:dd:42'
 
 # This is the name of the interface on your physical machine that's connected to your SGI box
 #   In my case, it's the ethernet adapter, which is en0 

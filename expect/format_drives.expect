@@ -3,6 +3,10 @@
 spawn screen /dev/ttyUSB0 9600
 send -- "\r"
 
+
+NOTE need to  admin mkfs
+
+
 expect "*Option?*" { send -- "5\r" }
 expect "*> " { send -- "setenv netaddr 192.168.0.77\r" }
 expect "*> " { send -- "bootp():/disc1/stand/fx.ARCS -x\r" }
